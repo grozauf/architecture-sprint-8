@@ -4,6 +4,7 @@ import { useKeycloak } from '@react-keycloak/web';
 const ReportPage: React.FC = () => {
   const { keycloak, initialized } = useKeycloak();
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const downloadReport = async () => {
@@ -14,6 +15,7 @@ const ReportPage: React.FC = () => {
 
     try {
       setLoading(true);
+      setSuccess(null);
       setError(null);
 
       const response = await fetch(`${process.env.REACT_APP_API_URL}/reports`, {
@@ -22,6 +24,11 @@ const ReportPage: React.FC = () => {
         }
       });
 
+      if (response.ok) {
+        setSuccess('Report downloaded!');
+      } else {
+        setError('Failed to download report! Reason: ' + response.statusText)
+      }
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -61,6 +68,12 @@ const ReportPage: React.FC = () => {
         >
           {loading ? 'Generating Report...' : 'Download Report'}
         </button>
+
+        {success && (
+          <div className="mt-4 p-4 bg-green-100 text-green-700 rounded">
+            {success}
+          </div>
+        )}
 
         {error && (
           <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
